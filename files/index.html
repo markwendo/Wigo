@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wigo</title>
+<style>
+  :root { --bg:#f8f1ee; --card:#fdf9f7; --text:#2a2522; --muted:#8a7f79; --brand:#d62839; --onbrand:#fff; --soft:#f6e3e1; --idtext:#8c1a26; --border:#e6dcd7; --line:#eee6e2; --bubble:#efe7e3; --chatbg:#faf4f1; --dot:#e9dfda; --warnbg:#f9e7e5; --warnb:#eab4b0; --ok:#4b8a5a; --bad:#c0392b;
+          --r:16px; --fs:15px; --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --wall:none; --wallsize:auto;
+          box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; min-height: 100%; font: var(--fs)/1.45 var(--font); background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; padding: 12px; }
+  svg { width: 22px; height: 22px; flex-shrink: 0; }
+  .wrap { width: 100%; max-width: 1000px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; width: 100%; }
+  .page { max-width: 460px; padding: 30px; }
+  .serif, .mark, h1, h2, h3 { font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif; }
+  .mark { font-weight: 700; font-size: 34px; letter-spacing: -1px; margin: 0 0 2px; } .mark b { color: var(--brand); }
+  h1 { margin: 0 0 6px; font-size: 28px; font-weight: 700; letter-spacing: -.5px; } h2 { margin: 0 0 6px; } h3 { margin: 0 0 2px; font-size: 20px; }
+  .hint { margin: 0 0 14px; color: var(--muted); font-size: .9em; line-height: 1.5; }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin: 8px 0 5px; }
+  input { width: 100%; padding: 12px 14px; margin-bottom: 8px; border: 1.5px solid var(--border); border-radius: 14px; font: inherit; background: var(--bg); color: var(--text); }
+  input:focus { outline: 0; border-color: var(--brand); }
+  button { padding: 11px 20px; border: 0; border-radius: 999px; background: var(--brand); color: var(--onbrand); font: inherit; font-weight: 600; cursor: pointer; }
+  button.ghost { background: var(--bubble); color: var(--text); } button.small { padding: 6px 14px; font-size: 13px; } button.wide { width: 100%; margin-bottom: 8px; }
+  button.danger { background: none; color: var(--bad); border: 1.5px solid var(--bad); }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .tabs { display: flex; margin-bottom: 16px; border-bottom: 1px solid var(--line); } .tabs button { background: none; color: var(--muted); border-radius: 0; padding: 8px 2px; margin-right: 22px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tabs button.on { color: var(--text); border-color: var(--brand); }
+  #authMsg, .note { font-size: 13px; color: var(--bad); min-height: 18px; margin-top: 6px; } #authMsg.ok, .note.ok { color: var(--ok); }
+  #meter { height: 5px; background: var(--bubble); border-radius: 4px; overflow: hidden; margin-bottom: 4px; } #meter i { display: block; height: 100%; width: 0; transition: .2s; }
+  .idbox { display: flex; gap: 10px; align-items: center; background: var(--soft); border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; }
+  .idbox code { flex: 1; font: 700 22px Georgia, serif; letter-spacing: 1px; color: var(--idtext); }
+  #slide { padding: 6px 0; } #slideNum { font: italic 700 54px Georgia, serif; color: var(--brand); line-height: 1; margin-bottom: 8px; }
+  #dots { display: flex; gap: 6px; margin: 6px 0 18px; } .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); } .dot.on { background: var(--brand); width: 24px; border-radius: 6px; }
+  #intro .row button { flex: 1; }
+
+  #app:not([hidden]) { display: flex; } #app { height: min(88vh, 700px); border-radius: 22px; }
+  #rail { width: 68px; background: var(--bg); border-right: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; padding: 14px 0; gap: 8px; flex-shrink: 0; }
+  #rail .mark { font-size: 28px; margin-bottom: 14px; }
+  .rb { width: 44px; height: 44px; padding: 0; border-radius: 14px; background: none; color: var(--muted); display: flex; align-items: center; justify-content: center; } .rb:hover { background: var(--bubble); } .rb.on { background: var(--text); color: var(--card); }
+  #side { width: 310px; border-right: 1px solid var(--line); display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; }
+  .top { display: flex; justify-content: space-between; align-items: center; padding: 18px 18px 10px; } .top h2 { margin: 0; font-size: 26px; }
+  .plus { display: flex; align-items: center; gap: 6px; padding: 10px 16px 10px 12px; } .plus svg { stroke-width: 2.6; }
+  #search { margin: 0 14px 8px; width: calc(100% - 28px); padding: 9px 14px; border-radius: 999px; }
+  #safePill { display: flex; align-items: center; gap: 6px; margin: 0 14px 8px; padding: 7px 12px; border-radius: 12px; background: var(--soft); color: var(--idtext); font-size: 12px; font-weight: 600; } #safePill svg, #safeBadge svg { width: 15px; height: 15px; }
+  .incoming { background: var(--warnbg); border: 1px solid var(--warnb); border-radius: 14px; padding: 10px 12px; margin: 0 14px 8px; font-size: 13px; } .incoming .btns { display: flex; gap: 8px; margin-top: 8px; }
+  .item { display: flex; gap: 12px; align-items: center; padding: 11px 18px; cursor: pointer; } .item.active, .item:hover { background: var(--soft); }
+  .av { position: relative; width: 42px; height: 42px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font: 700 17px Georgia, serif; flex-shrink: 0; }
+  .av.on::after { content: ""; position: absolute; right: -1px; bottom: -1px; width: 12px; height: 12px; border-radius: 50%; background: var(--ok); border: 2.5px solid var(--card); }
+  .item .t { flex: 1; min-width: 0; } .item .t div:first-child { font-weight: 600; } .item .t div:last-child { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .badge { background: var(--brand); color: var(--onbrand); border-radius: 10px; font-size: 11px; padding: 2px 8px; } .none { padding: 14px 18px; font-size: 13px; color: var(--muted); }
+
+  #main { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--card); }
+  #empty { margin: auto; text-align: center; color: var(--muted); padding: 24px; max-width: 320px; } #empty svg { width: 56px; height: 56px; stroke-width: 1.2; margin-bottom: 8px; } #empty .btn2 { margin-top: 16px; }
+  #pane { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  header { padding: 12px 18px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); }
+  header .who { flex: 1; } header b { font-family: Georgia, serif; font-size: 18px; } header small { display: block; color: var(--muted); font-size: 12px; } #back, #setBack { display: none; background: none; color: var(--text); padding: 4px; }
+  #safeBadge { display: flex; align-items: center; gap: 5px; background: var(--soft); color: var(--idtext); border-radius: 10px; padding: 4px 10px; font-size: 11px; font-weight: 600; }
+  #messages, #sample { background-color: var(--chatbg); background-image: var(--wall); background-size: var(--wallsize); }
+  #messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .msg { max-width: 75%; padding: 9px 14px; border-radius: var(--r); border-bottom-left-radius: 4px; background: var(--bubble); word-wrap: break-word; } .msg.me { align-self: flex-end; background: var(--brand); color: var(--onbrand); border-radius: var(--r); border-bottom-right-radius: 4px; }
+  .msg .nm { font-size: 11px; opacity: .7; margin-bottom: 2px; } .sys { align-self: center; font-size: 12px; color: var(--muted); text-align: center; }
+  form { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--line); } form input { margin: 0; flex: 1; min-width: 0; border-radius: 999px; } form button { display: flex; align-items: center; padding: 0 16px; }
+
+  #settings { flex: 1; overflow-y: auto; } #settings .head { display: flex; align-items: center; gap: 10px; padding: 18px 26px 6px; } #settings .head h2 { margin: 0; font-size: 26px; } #settings .body { padding: 6px 26px 30px; max-width: 640px; }
+  .sec { margin: 22px 0 0; } .rowset { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); } .rowset:last-child { border-bottom: 0; }
+  .rowset.stack { flex-direction: column; align-items: flex-start; } .rowset .l b { display: block; font-weight: 600; font-size: .93em; } .rowset .l span { font-size: 12px; color: var(--muted); }
+  .rowset input { margin: 0; } .rowset .grow { flex: 1; display: flex; gap: 8px; width: 100%; } .rowset code { font-weight: 700; color: var(--idtext); }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; } .seg button { background: none; color: var(--text); border: 1.5px solid var(--border); padding: 6px 14px; font-size: 13px; font-weight: 500; } .seg button.on { background: var(--text); color: var(--card); border-color: var(--text); }
+  #swatches { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-start; } .swatch { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; color: var(--muted); background: none; padding: 0; }
+  .swatch i { width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--card); box-shadow: 0 0 0 1.5px var(--border); } .swatch.on i { box-shadow: 0 0 0 2.5px var(--text); } .swatch.on { color: var(--text); }
+  #accentPick { width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
+  .tg { position: relative; width: 46px; height: 27px; flex-shrink: 0; } .tg input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; z-index: 1; }
+  .tg i { position: absolute; inset: 0; background: var(--border); border-radius: 999px; transition: .15s; } .tg i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 21px; height: 21px; border-radius: 50%; background: #fff; transition: .15s; }
+  .tg input:checked + i { background: var(--brand); } .tg input:checked + i::after { transform: translateX(19px); }
+  #sample { width: 100%; border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+
+  #modal { position: fixed; inset: 0; background: rgba(30,20,18,.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
+  #modal .box { background: var(--card); border-radius: 22px; padding: 26px; width: 100%; max-width: 400px; } #modal .row button { flex: 1; } #homeStatus { font-size: 13px; color: var(--muted); min-height: 18px; margin-bottom: 8px; }
+  @media (max-width: 700px) {
+    #app { flex-direction: column; height: 90vh; } #rail { order: 3; width: 100%; flex-direction: row; justify-content: center; gap: 28px; padding: 6px 0; border-right: 0; border-top: 1px solid var(--line); } #rail .mark { display: none; }
+    #side { width: 100%; flex: 1; border-right: 0; } #main { display: none; flex: 1; min-height: 0; }
+    #app.in-chat #side, #app[data-view=settings] #side { display: none; } #app.in-chat #main, #app[data-view=settings] #main { display: flex; } #app.in-chat #rail { display: none; }
+    #back, #setBack { display: inline-flex; } #settings .head, #settings .body { padding-left: 16px; padding-right: 16px; }
+  }
+
+  .av { background-size: cover; background-position: center; } .av.big { width: 88px; height: 88px; font-size: 34px; border: 4px solid var(--card); } .av.sm { width: 32px; height: 32px; font-size: 14px; }
+  #toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--card); padding: 11px 20px; border-radius: 999px; font-size: 14px; z-index: 50; max-width: 92vw; text-align: center; }
+  .vback { display: none; background: none; color: var(--text); padding: 4px; } #groupBtn { margin-left: auto; margin-right: 8px; }
+  #pane { position: relative; } header .who { cursor: pointer; min-width: 0; } header small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hbtn, .ibtn { background: none; color: var(--text); padding: 8px; border-radius: 50%; display: flex; } .ibtn { color: var(--muted); } .hbtn:hover, .ibtn:hover { background: var(--bubble); color: var(--text); } .ibtn.rec { background: var(--bad); color: #fff; }
+  #moreMenu { position: absolute; right: 14px; top: 58px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 6px; z-index: 6; box-shadow: 0 8px 24px rgba(0,0,0,.16); min-width: 210px; }
+  #moreMenu button, #attachMenu button { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; color: var(--text); font-weight: 500; border-radius: 10px; padding: 10px 12px; } #moreMenu button:hover, #attachMenu button:hover { background: var(--bubble); }
+  .composer { position: relative; align-items: center; gap: 6px; padding: 10px 12px; } #recNote { font-size: 12px; color: var(--bad); padding: 6px 16px 0; }
+  #attachMenu, #tray { position: absolute; bottom: 64px; left: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.16); z-index: 6; }
+  #tray { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: min(360px, 92%); max-height: 270px; overflow: auto; } #tray .stk { cursor: pointer; font-size: 15px; padding: 10px 6px; text-align: center; }
+  .stk { display: inline-block; padding: 14px 22px; border-radius: 30px 12px 30px 12px; font: 800 24px Georgia, serif; transform: rotate(var(--rot)); box-shadow: 0 3px 0 rgba(0,0,0,.18), inset 0 0 0 3px rgba(255,255,255,.45); animation: pop .35s; } @keyframes pop { from { transform: scale(.4) rotate(var(--rot)); } }
+  .msg.bare { background: none !important; padding: 0; } .media { display: block; max-width: min(260px, 100%); max-height: 300px; border-radius: 12px; } audio { max-width: 240px; height: 36px; }
+  .pcard { border: 1px solid var(--line); border-radius: 20px; overflow: hidden; background: var(--card); text-align: center; padding-bottom: 18px; } .pban { height: 96px; } .pcard .av.big { margin: -44px auto 6px; }
+  .pcard h3 { margin: 0; font-size: 22px; } .pcard .sub { color: var(--muted); font-size: 13px; } .pcard p { margin: 8px 20px 0; font-size: 14px; } .chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 16px 0; } .chip { background: var(--soft); color: var(--idtext); border-radius: 999px; padding: 3px 12px; font-size: 12px; font-weight: 600; }
+  #games, #profile { flex: 1; overflow-y: auto; } #games .head, #profile .head { display: flex; align-items: center; gap: 10px; padding: 18px 26px 6px; } #games .head h2, #profile .head h2 { margin: 0; font-size: 26px; } #games .body, #profile .body { padding: 6px 26px 30px; max-width: 640px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } .gcard { text-align: left; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 18px; padding: 16px; } .gcard.on { border-color: var(--brand); } .gcard b { font: 700 18px Georgia, serif; display: block; } .gcard span { font-size: 13px; color: var(--muted); font-weight: 400; }
+  .frow { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; font-weight: 500; color: var(--text); margin: 0; } .frow .t { flex: 1; }
+  .overlay { position: fixed; inset: 0; background: rgba(20,14,12,.6); z-index: 20; display: flex; align-items: center; justify-content: center; padding: 16px; } .overlay .box { background: var(--card); border-radius: 22px; padding: 22px; width: 100%; max-width: 400px; max-height: 90vh; overflow: auto; }
+  #camVideo { width: 100%; border-radius: 14px; background: #000; transform: scaleX(-1); }
+  #callUI { position: fixed; inset: 0; background: #12100f; z-index: 30; display: flex; flex-direction: column; color: #fff; } #callUI .stage { flex: 1; position: relative; min-height: 0; overflow: hidden; }
+  #remoteVideo { width: 100%; height: 100%; object-fit: contain; background: #000; } #localVideo { position: absolute; right: 14px; bottom: 14px; width: 140px; border-radius: 14px; background: #222; border: 2px solid rgba(255,255,255,.3); } #callUI.audio #localVideo { display: none; }
+  #callTitle { position: absolute; top: 16px; left: 18px; font: 700 20px Georgia, serif; text-shadow: 0 1px 6px #000; } #callNote { position: absolute; top: 48px; left: 18px; font-size: 13px; opacity: .85; }
+  #callUI .ctrls { display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; padding: 14px; background: #1c1917; } #callUI .ctrls button { background: #3a3532; color: #fff; padding: 10px 16px; } #callUI .ctrls .off { background: #7a2a2a; } #callUI .ctrls .on { background: var(--brand); } #callUI .ctrls .end { background: #d33; }
+  .float { position: absolute; bottom: 20px; font-size: 36px; animation: rise 2.4s forwards; pointer-events: none; } @keyframes rise { to { transform: translateY(-260px); opacity: 0; } }
+  #ring { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--card); color: var(--text); border: 1px solid var(--line); border-radius: 18px; padding: 14px 18px; z-index: 40; box-shadow: 0 8px 30px rgba(0,0,0,.28); display: flex; gap: 12px; align-items: center; }
+  #tttGrid { display: grid; grid-template-columns: repeat(3, 76px); gap: 8px; justify-content: center; margin: 14px 0; } #tttGrid button { height: 76px; font: 700 34px Georgia, serif; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 16px; padding: 0; }
+  .rps { display: flex; gap: 8px; justify-content: center; margin: 14px 0; flex-wrap: wrap; } .gstat { text-align: center; color: var(--muted); font-size: 14px; min-height: 20px; margin-bottom: 8px; }
+  @media (max-width: 700px) {
+    #app[data-view=games] #side, #app[data-view=profile] #side { display: none; } #app[data-view=games] #main, #app[data-view=profile] #main { display: flex; }
+    .vback { display: inline-flex; } #games .head, #profile .head, #games .body, #profile .body { padding-left: 16px; padding-right: 16px; } .grid2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="auth" class="card page">
+    <div class="mark">wigo<b>.</b></div>
+    <p class="hint">Private chat with people you trust.</p>
+    <div class="tabs"><button id="tabSignup" class="on">Create account</button><button id="tabLogin">Log in</button></div>
+    <div id="signupForm">
+      <label for="suName">Your name</label><input id="suName" maxlength="30" autocomplete="name">
+      <label for="suDob">Date of birth</label><input id="suDob" type="date">
+      <label for="suEmail">Gmail (required)</label><input id="suEmail" type="email" placeholder="you@gmail.com" autocomplete="email">
+      <label for="suPhone">Phone number (optional)</label><input id="suPhone" type="tel" placeholder="e.g. +123 456 7890" autocomplete="tel">
+      <label for="suPass">Password</label><input id="suPass" type="password" autocomplete="new-password">
+      <div id="meter"><i></i></div><div id="pwHint" class="hint"></div>
+      <label for="suPass2">Confirm password</label><input id="suPass2" type="password" autocomplete="new-password">
+      <button id="signupBtn" class="wide">Create my Wigo ID</button>
+    </div>
+    <div id="loginForm" hidden>
+      <label for="liId">Gmail or Wigo ID</label><input id="liId" autocomplete="username">
+      <label for="liPass">Password</label><input id="liPass" type="password" autocomplete="current-password">
+      <button id="loginBtn" class="wide">Log in</button>
+      <button id="resendBtn" class="ghost small">Email me my Wigo ID</button>
+    </div>
+    <div id="authMsg"></div>
+  </div>
+
+  <div id="reveal" class="card page" hidden>
+    <div class="mark">wigo<b>.</b></div>
+    <h1>This is your Wigo ID</h1>
+    <p class="hint">It's made just for you and no one else has it. Download it and keep it somewhere safe. Only share it with people you trust.</p>
+    <div class="idbox"><code id="revealId"></code><button class="small" id="copyBtn1">Copy</button></div>
+    <button id="downloadBtn" class="wide ghost">Download my Wigo ID</button>
+    <p class="hint" id="revealMail" style="margin-top:10px"></p>
+    <button id="nextBtn" class="wide">Continue</button>
+  </div>
+
+  <div id="intro" class="card page" hidden>
+    <div id="slide"><div id="slideNum"></div><h1 id="slideTitle"></h1><p class="hint" id="slideText"></p></div>
+    <div id="dots"></div>
+    <div class="row"><button class="ghost" id="skipBtn">Skip</button><button class="ghost" id="introBack">Back</button><button id="introNext">Next</button></div>
+  </div>
+
+  <div id="app" class="card" hidden>
+    <nav id="rail">
+      <div class="mark">w<b>.</b></div>
+      <button class="rb on" data-view="chats" title="Chats" aria-label="Chats"><svg data-icon="chat"></svg></button>
+      <button class="rb" data-view="games" title="Games" aria-label="Games"><svg data-icon="gamepad"></svg></button>
+      <button class="rb" data-view="profile" title="Profile" aria-label="Profile"><svg data-icon="user"></svg></button>
+      <button class="rb" data-view="settings" title="Settings" aria-label="Settings"><svg data-icon="sliders"></svg></button>
+    </nav>
+    <aside id="side">
+      <div class="top"><h2>Chats</h2><button class="ibtn" id="groupBtn" title="New group" aria-label="New group"><svg data-icon="users"></svg></button><button class="plus" id="plusBtn" title="Add a friend" aria-label="Add a friend"><svg data-icon="plus"></svg>Add friend</button></div>
+      <div id="safePill" hidden><svg data-icon="shield"></svg>Safe Chat is on</div>
+      <input id="search" placeholder="Search friends" autocomplete="off">
+      <div id="reqList"></div>
+      <div id="chatList"></div>
+    </aside>
+    <main id="main">
+      <div id="empty"><svg data-icon="chat"></svg><h3>Nothing open yet</h3><p class="hint">Pick a friend from the list, or add someone new with their Wigo ID and name.</p><button class="btn2" id="emptyPlus">Add a friend</button></div>
+      <div id="pane" hidden>
+        <header>
+          <button id="back" aria-label="Back"><svg data-icon="back"></svg></button>
+          <div class="who" id="peerHead"><b id="peerName"></b><small id="peerStatus"></small></div>
+          <span id="safeBadge" hidden><svg data-icon="shield"></svg>Safe Chat</span>
+          <button class="hbtn" id="callAudio" title="Audio call" aria-label="Audio call"><svg data-icon="phone"></svg></button>
+          <button class="hbtn" id="callVideo" title="Video call" aria-label="Video call"><svg data-icon="video"></svg></button>
+          <button class="hbtn" id="moreBtn" title="More" aria-label="More"><svg data-icon="more"></svg></button>
+        </header>
+        <div id="moreMenu" hidden><button id="mBg">Chat background...</button><button id="mBgReset">Reset background</button><button id="mRemove">Remove friend</button></div>
+        <div id="messages"></div>
+        <div id="recNote" hidden></div>
+        <form id="form" class="composer">
+          <button type="button" class="ibtn" id="attachBtn" title="Attach" aria-label="Attach"><svg data-icon="clip"></svg></button>
+          <button type="button" class="ibtn" id="stickerBtn" title="Stickers" aria-label="Stickers"><svg data-icon="smile"></svg></button>
+          <input id="text" autocomplete="off" maxlength="1000">
+          <button type="button" class="ibtn" id="micBtn" title="Voice message" aria-label="Voice message"><svg data-icon="mic"></svg></button>
+          <button aria-label="Send"><svg data-icon="send"></svg></button>
+          <div id="attachMenu" hidden><button type="button" id="aFile"><svg data-icon="image"></svg>Photo or video</button><button type="button" id="aGif"><svg data-icon="image"></svg>GIF from your device</button><button type="button" id="aCam"><svg data-icon="camera"></svg>Take a photo</button></div>
+          <div id="tray" hidden></div>
+        </form>
+        <input type="file" id="fileInput" accept="image/*,video/*" hidden><input type="file" id="gifInput" accept="image/gif" hidden><input type="file" id="bgInput" accept="image/*" hidden>
+      </div>
+
+      <div id="games" hidden>
+        <div class="head"><button class="vback" aria-label="Back"><svg data-icon="back"></svg></button><h2>Games</h2></div>
+        <div class="body">
+          <p class="hint">Pick a game, then invite a friend who's online. They have 4 minutes to answer.</p>
+          <div class="grid2" id="gameCards"></div>
+          <div class="sec"><h3>Invite a friend</h3><div id="gameFriends"></div><div class="note" id="gameStatus"></div></div>
+        </div>
+      </div>
+
+      <div id="profile" hidden>
+        <div class="head"><button class="vback" aria-label="Back"><svg data-icon="back"></svg></button><h2>Your profile</h2></div>
+        <div class="body">
+          <p class="hint">This is what your friends see when they tap your name.</p>
+          <div id="pcard"></div>
+          <div class="row" style="margin:14px 0 4px"><button class="ghost small" id="pUpload">Upload photo</button><button class="ghost small" id="pCam">Take photo</button><button class="ghost small" id="pRemove">Remove photo</button></div>
+          <label for="pStatus">Status</label><input id="pStatus" maxlength="60" placeholder="What are you up to?">
+          <label for="pPronouns">Pronouns</label><input id="pPronouns" maxlength="20">
+          <label for="pBio">Bio</label><input id="pBio" maxlength="160" placeholder="A line about you">
+          <label for="pInterests">Interests (up to 5, separated by commas)</label><input id="pInterests" placeholder="film photography, jazz, hiking">
+          <label for="pColor">Banner colour</label><input id="pColor" type="color" style="width:64px;height:42px;padding:2px">
+          <button id="pSave" style="margin-top:10px">Save profile</button><div class="note" id="pNote"></div>
+          <input type="file" id="pFile" accept="image/*" hidden>
+        </div>
+      </div>
+
+      <div id="settings" hidden>
+        <div class="head"><button id="setBack" class="vback" aria-label="Back"><svg data-icon="back"></svg></button><h2>Settings</h2></div>
+        <div class="body">
+          <div class="sec"><h3>Appearance</h3>
+            <div class="rowset stack"><div class="l"><b>Mode</b></div><div class="seg" data-key="mode"></div></div>
+            <div class="rowset stack"><div class="l"><b>Theme</b><span>Pick a palette, or choose your own colour.</span></div><div id="swatches"></div></div>
+            <div class="rowset"><div class="l"><b>Custom accent colour</b></div><div class="row"><input type="color" id="accentPick"><button class="ghost small" id="accentReset">Reset</button></div></div>
+            <div class="rowset stack"><div class="l"><b>Chat background</b></div><div class="seg" data-key="wall"></div></div>
+            <div class="rowset stack"><div class="l"><b>Message shape</b></div><div class="seg" data-key="bubble"></div></div>
+            <div class="rowset stack"><div class="l"><b>Font</b></div><div class="seg" data-key="font"></div></div>
+            <div class="rowset stack"><div class="l"><b>Text size</b></div><div class="seg" data-key="size"></div></div>
+            <div class="rowset stack"><div class="l"><b>Preview</b></div><div id="sample"><div class="msg">Found the perfect colours for our board</div><div class="msg me">Love it. Saving it now</div></div></div>
+          </div>
+          <div class="sec"><h3>Account</h3>
+            <div class="rowset stack"><div class="l"><b>Display name</b></div><div class="grow"><input id="setName" maxlength="30"><button id="saveName" class="small">Save</button></div><div class="note" id="nameNote"></div></div>
+            <div class="rowset"><div class="l"><b>Gmail</b></div><span id="acEmail"></span></div>
+            <div class="rowset"><div class="l"><b>Phone</b></div><span id="acPhone"></span></div>
+            <div class="rowset"><div class="l"><b>Wigo ID</b><span>Share it only with people you trust.</span></div><div class="row"><code id="acId"></code><button class="ghost small" id="copyBtn2">Copy</button><button class="ghost small" id="downloadBtn2">Download</button></div></div>
+            <div class="rowset stack"><div class="l"><b>Change password</b></div><div class="grow"><input id="pwCur" type="password" placeholder="Current password" autocomplete="current-password"></div><div class="grow"><input id="pwNew" type="password" placeholder="New password" autocomplete="new-password"><button id="savePw" class="small">Update</button></div><div class="note" id="pwNote"></div></div>
+          </div>
+          <div class="sec"><h3>Notifications</h3>
+            <div class="rowset"><div class="l"><b>Message sound</b></div><label class="tg"><input type="checkbox" data-pref="sound"><i></i></label></div>
+            <div class="rowset"><div class="l"><b>Desktop notifications</b><span>Shown when Wigo isn't the open tab.</span></div><label class="tg"><input type="checkbox" data-pref="desktop"><i></i></label></div>
+            <div class="rowset"><div class="l"><b>Show message previews</b><span>In the chat list and in notifications.</span></div><label class="tg"><input type="checkbox" data-pref="preview"><i></i></label></div>
+          </div>
+          <div class="sec"><h3>Privacy and safety</h3>
+            <div class="rowset"><div class="l"><b>Accept friend requests</b><span>Turn off to stop new requests. Current friends aren't affected.</span></div><label class="tg"><input type="checkbox" id="acceptReq"><i></i></label></div>
+            <div class="rowset"><div class="l"><b>Safe Chat</b><span id="safeStatus"></span></div></div>
+          </div>
+          <div class="sec"><h3>Chat</h3>
+            <div class="rowset"><div class="l"><b>Show message times</b></div><label class="tg"><input type="checkbox" data-pref="stamps"><i></i></label></div>
+          </div>
+          <div class="sec"><h3>Session</h3>
+            <div class="rowset"><div class="l"><b>Log out</b><span>You'll need your Gmail or Wigo ID and password to get back in.</span></div><button class="ghost small" id="logoutBtn">Log out</button></div>
+            <div class="rowset stack"><div class="l"><b>Delete account</b><span>Removes your account and friends for good. Your Wigo ID is never reused.</span></div><button class="danger small" id="delBtn">Delete my account</button>
+              <div id="delBox" hidden class="grow"><input id="delPw" type="password" placeholder="Your password" autocomplete="current-password"><button class="danger small" id="delGo">Delete forever</button></div><div class="note" id="delNote"></div></div>
+          </div>
+          <div class="sec"><h3>About</h3><p class="hint">Wigo 1.0. A private chat for people who know each other's ID.</p></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="modal" hidden><div class="box">
+  <h2>Add a friend</h2>
+  <p class="hint">You need their Wigo ID and their name, and the two have to match. They'll get a friend request, and once they accept you can chat.</p>
+  <label for="friendId">Their Wigo ID</label><input id="friendId" placeholder="WIGO-XXXX-XXXX" autocomplete="off">
+  <label for="friendName">Their name</label><input id="friendName" placeholder="As it appears on their profile" autocomplete="off" maxlength="30">
+  <div id="homeStatus"></div>
+  <div class="row"><button id="requestBtn">Send request</button><button class="ghost" id="cancelBtn">Close</button></div>
+</div></div>
+
+<div id="profileModal" class="overlay" hidden><div class="box"><div id="pmCard"></div><button class="wide ghost" id="pmClose" style="margin-top:12px">Close</button></div></div>
+<div id="groupModal" class="overlay" hidden><div class="box"><h2>New group</h2><p class="hint">Name it and pick the friends to add.</p><input id="gmName" maxlength="40" placeholder="Group name"><div id="gmFriends" style="max-height:220px;overflow:auto"></div><div class="note" id="gmNote"></div><div class="row"><button id="gmCreate" style="flex:1">Create group</button><button class="ghost" id="gmCancel" style="flex:1">Cancel</button></div></div></div>
+<div id="camModal" class="overlay" hidden><div class="box"><video id="camVideo" autoplay playsinline muted></video><div class="row" style="margin-top:12px"><button id="camShot" style="flex:1">Take photo</button><button class="ghost" id="camCancel" style="flex:1">Cancel</button></div></div></div>
+<div id="gameModal" class="overlay" hidden><div class="box"><h2 id="gameTitle"></h2><div id="gameBody"></div><button class="wide ghost" id="gameQuit">Leave game</button></div></div>
+<div id="ring" hidden><span id="ringText"></span><button class="small" id="ringYes">Answer</button><button class="small ghost" id="ringNo">Decline</button></div>
+<div id="callUI" hidden>
+  <div class="stage" id="callStage"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay playsinline muted></video><div id="callTitle"></div><div id="callNote"></div></div>
+  <div class="ctrls"><button id="cMute">Mute</button><button id="cCam">Camera</button><button id="cShare">Watch together</button>
+    <button class="react" data-e="laugh">😂</button><button class="react" data-e="love">❤️</button><button class="react" data-e="clap">👏</button><button class="react" data-e="fire">🔥</button>
+    <button class="end" id="cEnd">End</button></div>
+</div>
+<div id="toast" hidden></div>
+
+<script src="/rules.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/core.js"></script>
+<script src="/js/theme.js"></script>
+<script src="/js/settings.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/chat.js"></script>
+<script src="/js/media.js"></script>
+<script src="/js/profile.js"></script>
+<script src="/js/calls.js"></script>
+<script src="/js/games.js"></script>
+</body>
+</html>
